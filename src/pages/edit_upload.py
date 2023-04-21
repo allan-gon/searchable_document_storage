@@ -57,7 +57,17 @@ def delete_tag(e: ControlEvent, drop: Dropdown) -> None:
                 break
 
 
-def create_edit_upload_page(page: Page) -> View:
+def remove_btn(e: ControlEvent, lv: ListView) -> None:
+    for row in lv.controls:
+        if row.controls[-1] == e.control:
+            remove(row.controls[0].src)
+            lv.controls.remove(row)
+            break
+    e.page.update()
+
+
+def create_edit_upload_page(page: Page) -> None:
+    # control that will hold buttons that represent selected tags
     tags = Row(
         wrap=True,
         spacing=10,
@@ -66,6 +76,9 @@ def create_edit_upload_page(page: Page) -> View:
         width=page.width // 4,
     )
 
+    # the following path nonsense is because of a problem loading images
+    # that get copied to a folder using relative path
+    # flet doesn't load the images so abs path is required to make it work
     rel_dir = "data/temp"
     # Get the absolute path of the directory containing the script
     script_dir = dirname(abspath(__file__))
@@ -154,12 +167,3 @@ def create_edit_upload_page(page: Page) -> View:
             ],
         )
     )
-
-
-def remove_btn(e: ControlEvent, lv: ListView) -> None:
-    for row in lv.controls:
-        if row.controls[-1] == e.control:
-            remove(row.controls[0].src)
-            lv.controls.remove(row)
-            break
-    e.page.update()

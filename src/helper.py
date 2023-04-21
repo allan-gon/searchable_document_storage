@@ -28,16 +28,37 @@ def ensure_folders_exist() -> None:
     if not exists("./data/"):
         mkdir("./data")
         mkdir("./data/temp")
-    elif not exists("./data/temp"):
+
+    if not exists("./data/temp"):
         mkdir("./data/temp")
+
+    if not exists("./data/docs"):
+        mkdir("./data/docs")
+
+
+def ensure_tags_exist() -> None:
     # create file if missing
     if not exists("./data/tags"):
         with open("./data/tags", "w") as file:
             file.write()
 
 
+def setup() -> None:
+    # necessary because my local version will have stuff in it
+    # and it would suck to have to clear it every time I update
+    # and ship the app. Instead those folders/files are ommited
+    # by default an made on 1st app start
+    ensure_folders_exist()
+    ensure_tags_exist()
+
+
 def intermediate(res: FilePickerResultEvent, route: str) -> None:
-    """ """
+    """
+    Needed to refresh page since that only happens on route change.
+    Refeshing, to the user, doesn't mean changing pages so behing the
+    scenes I change the route then return so the on route change event
+    triggers and page is refreshed
+    """
     res.page.go("/intermediate")
     res.page.go(route)
 

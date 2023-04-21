@@ -1,6 +1,6 @@
 from flet import app, FilePicker, Page
 from src.constants import WIDTH, HEIGHT
-from src.helper import create_nav_bar, ensure_folders_exist, copy_selected_files
+from src.helper import create_nav_bar, setup, copy_selected_files
 from src.pages.upload import create_init_upload_page
 from src.pages.edit_upload import create_edit_upload_page
 from src.pages.search import create_search_page
@@ -8,8 +8,8 @@ from src.pages.tbd import tbd
 
 
 def main(page: Page):
-    # make storage folders on 1st start or if folders get deleted
-    ensure_folders_exist()
+    # make sure certain folders exists 1st time
+    setup()
 
     # Basic app setup
     page.title = "File Storage"
