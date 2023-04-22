@@ -6,4 +6,6 @@ HEIGHT = 1080
 # used for navigation
 ROUTES = ["/search", "/begin_upload", "/tbd", "/edit_upload"]
 
-# pyinstaller --onefile --add-data "my_project/models/en_core_web_sm;models" my_script.py
+# folder with db
+INDEX_DIR = "./data/indexdir"
+# pyinstaller --onefile --add-data "my_project/models/en_core_web_sm-3.5.0;models" my_script.py

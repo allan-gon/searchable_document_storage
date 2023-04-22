@@ -9,7 +9,7 @@ from src.pages.tbd import tbd
 
 def main(page: Page):
     # make sure certain folders exists 1st time
-    setup()
+    ocr, nlp = setup()
 
     # Basic app setup
     page.title = "File Storage"
@@ -31,7 +31,7 @@ def main(page: Page):
             case "/begin_upload":
                 create_init_upload_page(page)
             case "/edit_upload":
-                create_edit_upload_page(page)
+                create_edit_upload_page(page, ocr, nlp)
             case "/tbd":
                 tbd(page)
         page.update()
@@ -46,3 +46,14 @@ def main(page: Page):
 
 if __name__ == "__main__":
     app(target=main)
+
+
+# from easyocr import Reader
+# from spacy import load
+
+# nlp = load("./model/en_core_web_sm-3.5.0")
+# reader = Reader(["en"])
+# content = reader.readtext("C:/Users/Allan/Pictures/Saved Pictures/temp.png", detail=0)
+# doc = nlp(" ".join(content))
+# text = " ".join([token.lemma_ for token in doc])
+# print(text)

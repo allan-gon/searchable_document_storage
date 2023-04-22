@@ -6,9 +6,12 @@ from flet import (
     FilePickerResultEvent,
 )
 from src.constants import ROUTES
+from src.search_related import ensure_index_exists
 from os.path import exists
 from os import mkdir, listdir
 from shutil import copy
+from spacy import load
+from easyocr import Reader
 
 
 def create_nav_bar(page: Page) -> NavigationBar:
@@ -43,13 +46,15 @@ def ensure_tags_exist() -> None:
             file.write()
 
 
-def setup() -> None:
+def setup() -> tuple:
     # necessary because my local version will have stuff in it
     # and it would suck to have to clear it every time I update
     # and ship the app. Instead those folders/files are ommited
     # by default an made on 1st app start
     ensure_folders_exist()
     ensure_tags_exist()
+    ensure_index_exists()
+    return Reader(["en"]), load("./model/en_core_web_sm-3.5.0")
 
 
 def intermediate(res: FilePickerResultEvent, route: str) -> None:

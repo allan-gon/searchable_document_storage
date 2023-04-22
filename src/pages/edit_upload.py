@@ -1,8 +1,8 @@
 from os.path import dirname, abspath, join
-from os import remove, listdir
+from os import remove, listdir, mkdir
+from shutil import move
 from flet import (
     Row,
-    View,
     Page,
     Text,
     Image,
@@ -17,6 +17,8 @@ from flet import (
     FilePickerFileType,
     ControlEvent,
 )
+from asyncio import run
+from src.search_related import insert_doc
 
 
 def create_tag(drop: Dropdown, text: str, e: ControlEvent) -> None:
@@ -66,7 +68,40 @@ def remove_btn(e: ControlEvent, lv: ListView) -> None:
     e.page.update()
 
 
-def create_edit_upload_page(page: Page) -> None:
+def create_folder_name() -> str:
+    if not listdir("./data/docs"):
+        return "./data/docs/doc_1"
+    else:
+        max_num = int(listdir("./data/docs")[-1].split("_")[-1])
+        return f"./data/docs/doc_{max_num + 1}"
+
+
+def move_files() -> str:
+    folder = create_folder_name()
+    mkdir(folder)
+    for file in listdir("./data/temp"):
+        move(f"./data/temp/{file}", folder)
+    return folder
+
+
+async def extract_text(folder: str, ocr, nlp) -> str:
+    full_text = ""
+    for file in listdir(folder):
+        content = ocr.readtext(f"{folder}/{file}", detail=0)
+        full_text += " " + " ".join(content)
+    doc = nlp(full_text)
+    text = " ".join([token.lemma_ for token in doc])
+    return text
+
+
+def save(tags: Row, ocr, nlp) -> None:
+    folder = move_files()
+    tags = ", ".join([control.text for control in tags.controls])
+    text = run(extract_text(folder, ocr, nlp))
+    insert_doc(folder, tags, text)
+
+
+def create_edit_upload_page(page: Page, ocr, nlp) -> None:
     # control that will hold buttons that represent selected tags
     tags = Row(
         wrap=True,
@@ -157,8 +192,26 @@ def create_edit_upload_page(page: Page) -> None:
                         tags,
                         Row(
                             controls=[
-                                OutlinedButton(text="Discard"),
-                                ElevatedButton(text="Save"),
+                                OutlinedButton(
+                                    text="Discard",
+                                    on_click=lambda _: page.go("/begin_upload"),
+                                ),
+                                ElevatedButton(
+                                    text="Save", on_click=lambda _: save(tags, ocr, nlp)
+                                ),
+                                # when i save a series of images.
+                                # they need to be moved to a folder
+                                # which means I need to generate a folder name
+                                # this process should happen sequentially since I
+                                # dont what the user added images to the temp folder
+                                # before I move over the saved doc
+                                # they then need to be added to the index
+                                # which means I need the tags as comma-space
+                                # delimited str
+                                # I also need the processed text of all images
+                                # in the doc. This should happen async
+                                # so that even if this takes a while it doesn't
+                                # just freeze the app while this happens
                             ]
                         ),
                     ],

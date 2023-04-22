@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e265e602a774d74506c5729f4d559ff83b448651c86d80c060eef79506841487"
+            "sha256": "98dd365206758b79cf98c9ff196a56219b05c354a6b0d7a7ac65c553b1e277aa"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -217,22 +217,6 @@
             ],
             "index": "pypi",
             "version": "==1.6.2"
-        },
-        "elastic-transport": {
-            "hashes": [
-                "sha256:19db271ab79c9f70f8c43f8f5b5111408781a6176b54ab2e54d713b6d9ceb815",
-                "sha256:b9ad708ceb7fcdbc6b30a96f886609a109f042c0b9d9f2e44403b3133ba7ff10"
-            ],
-            "markers": "python_version >= '3.6'",
-            "version": "==8.4.0"
-        },
-        "elasticsearch": {
-            "hashes": [
-                "sha256:1849356db4192fbb75b2b8f3d55edb0fb07f8d855f386b318a7889222b49591f",
-                "sha256:a06482f4c338ab6ace5cf89ee351cf3ee1854083f29a3b875433e608424fb48c"
-            ],
-            "index": "pypi",
-            "version": "==8.7.0"
         },
         "filelock": {
             "hashes": [
@@ -1327,6 +1311,15 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==10.4"
+        },
+        "whoosh": {
+            "hashes": [
+                "sha256:7ca5633dbfa9e0e0fa400d3151a8a0c4bec53bd2ecedc0a67705b17565c31a83",
+                "sha256:aa39c3c3426e3fd107dcb4bde64ca1e276a65a889d9085a6e4b54ba82420a852",
+                "sha256:e0857375f63e9041e03fedd5b7541f97cf78917ac1b6b06c1fcc9b45375dda69"
+            ],
+            "index": "pypi",
+            "version": "==2.7.4"
         }
     },
     "develop": {

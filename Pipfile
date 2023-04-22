@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 flet = "==0.4.2"
-elasticsearch = "==8.7.0"
 easyocr = "==1.6.2"
 spacy = "==3.5.2"
+whoosh = "==2.7.4"
 
 [dev-packages]
 black = "*"
