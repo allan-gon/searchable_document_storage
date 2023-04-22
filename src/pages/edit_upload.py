@@ -94,9 +94,10 @@ async def extract_text(folder: str, ocr, nlp) -> str:
     return text
 
 
-def save(tags: Row, ocr, nlp) -> None:
+def save(e: ControlEvent, tags: Row, ocr, nlp) -> None:
     folder = move_files()
     tags = ", ".join([control.text for control in tags.controls])
+    e.page.go("/begin_upload")
     text = run(extract_text(folder, ocr, nlp))
     insert_doc(folder, tags, text)
 
@@ -197,21 +198,9 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                     on_click=lambda _: page.go("/begin_upload"),
                                 ),
                                 ElevatedButton(
-                                    text="Save", on_click=lambda _: save(tags, ocr, nlp)
+                                    text="Save",
+                                    on_click=lambda e: save(e, tags, ocr, nlp),
                                 ),
-                                # when i save a series of images.
-                                # they need to be moved to a folder
-                                # which means I need to generate a folder name
-                                # this process should happen sequentially since I
-                                # dont what the user added images to the temp folder
-                                # before I move over the saved doc
-                                # they then need to be added to the index
-                                # which means I need the tags as comma-space
-                                # delimited str
-                                # I also need the processed text of all images
-                                # in the doc. This should happen async
-                                # so that even if this takes a while it doesn't
-                                # just freeze the app while this happens
                             ]
                         ),
                     ],

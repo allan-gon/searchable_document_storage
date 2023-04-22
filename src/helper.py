@@ -43,7 +43,7 @@ def ensure_tags_exist() -> None:
     # create file if missing
     if not exists("./data/tags"):
         with open("./data/tags", "w") as file:
-            file.write()
+            pass
 
 
 def setup() -> tuple:

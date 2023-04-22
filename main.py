@@ -46,14 +46,3 @@ def main(page: Page):
 
 if __name__ == "__main__":
     app(target=main)
-
-
-# from easyocr import Reader
-# from spacy import load
-
-# nlp = load("./model/en_core_web_sm-3.5.0")
-# reader = Reader(["en"])
-# content = reader.readtext("C:/Users/Allan/Pictures/Saved Pictures/temp.png", detail=0)
-# doc = nlp(" ".join(content))
-# text = " ".join([token.lemma_ for token in doc])
-# print(text)
