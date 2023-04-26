@@ -33,10 +33,14 @@ def create_tag(drop: Dropdown, text: str, e: ControlEvent) -> None:
             e.page.update()
 
 
-def select_tag(e: ControlEvent, btns: Row, drop: Dropdown) -> None:
+def select_tag(event: ControlEvent, btns: Row, drop: Dropdown) -> None:
     if drop.value:
-        btns.controls.append(ElevatedButton(text=drop.value))
-        e.page.update()
+        for btn in btns.controls:
+            if drop.value == btn.text:
+                break
+        else:
+            btns.controls.append(ElevatedButton(text=drop.value))
+            event.page.update()
 
 
 def disselect_tag(e: ControlEvent, btns: Row, drop: Dropdown) -> None:

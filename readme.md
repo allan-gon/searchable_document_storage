@@ -1,3 +1,3 @@
 ```
-pyinstaller -w --icon=icon.png --add-data "model;model" main.py
+pyinstaller -w --add-data "model;model" main.py
 ```
