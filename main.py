@@ -21,13 +21,10 @@ def main(page: Page):
 
     def route_change(_):
         """Handles navigation"""
-        # clear the page
-        page.controls.clear()
-
         # draw page accordingly
         match page.route:
             case "/search":
-                create_search_page(page)
+                create_search_page(page, nlp)
             case "/begin_upload":
                 create_init_upload_page(page)
             case "/edit_upload":

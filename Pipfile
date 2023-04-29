@@ -8,6 +8,7 @@ flet = "==0.4.2"
 easyocr = "==1.6.2"
 spacy = "==3.5.2"
 whoosh = "==2.7.4"
+qdrant-client = "==1.1.6"
 
 [dev-packages]
 black = "*"

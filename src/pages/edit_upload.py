@@ -16,24 +16,28 @@ from flet import (
     TextField,
     FilePickerFileType,
     ControlEvent,
+    View,
+    SnackBar,
 )
+from src.helper import insert, get_embedding, clear_view
+from functools import partial
 from asyncio import run
-from src.search_related import insert_doc
 
 
-def create_tag(drop: Dropdown, text: str, e: ControlEvent) -> None:
+def create_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
     if text:
         for option in drop.options:
-            if option.key == text:
+            if option.key == text.value:
                 break
         else:
-            drop.options.append(dropdown.Option(text))
+            drop.options.append(dropdown.Option(text.value))
             with open("./data/tags", "w") as file:
                 file.write("\n".join([option.key for option in drop.options]))
-            e.page.update()
+            event.page.update()
 
 
 def select_tag(event: ControlEvent, btns: Row, drop: Dropdown) -> None:
+    # when deleted, value must be changed
     if drop.value:
         for btn in btns.controls:
             if drop.value == btn.text:
@@ -43,33 +47,35 @@ def select_tag(event: ControlEvent, btns: Row, drop: Dropdown) -> None:
             event.page.update()
 
 
-def disselect_tag(e: ControlEvent, btns: Row, drop: Dropdown) -> None:
+def disselect_tag(event: ControlEvent, btns: Row, drop: Dropdown) -> None:
     if drop.value:
         for btn in btns.controls:
             if btn.text == drop.value:
                 btns.controls.remove(btn)
-                e.page.update()
+                event.page.update()
                 break
 
 
-def delete_tag(e: ControlEvent, drop: Dropdown) -> None:
+def delete_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
     if drop.value:
         for option in drop.options:
             if option.key == drop.value:
                 drop.options.remove(option)
+                text.value = ""
                 with open("./data/tags", "w") as file:
                     file.write("\n".join([option.key for option in drop.options]))
-                e.page.update()
+                event.page.update()
                 break
 
 
-def remove_btn(e: ControlEvent, lv: ListView) -> None:
+def remove_btn(event: ControlEvent, lv: ListView) -> None:
     for row in lv.controls:
-        if row.controls[-1] == e.control:
+        if row.controls[-1] == event.control:
             remove(row.controls[0].src)
             lv.controls.remove(row)
+
             break
-    e.page.update()
+    event.page.update()
 
 
 def create_folder_name() -> str:
@@ -88,22 +94,29 @@ def move_files() -> str:
     return folder
 
 
-async def extract_text(folder: str, ocr, nlp) -> str:
+async def extract_text(folder: str, ocr) -> str:
     full_text = ""
     for file in listdir(folder):
         content = ocr.readtext(f"{folder}/{file}", detail=0)
         full_text += " " + " ".join(content)
-    doc = nlp(full_text)
-    text = " ".join([token.lemma_ for token in doc])
-    return text
+    return full_text
 
 
-def save(e: ControlEvent, tags: Row, ocr, nlp) -> None:
+def save(event: ControlEvent, tags: Row, ocr, nlp) -> None:
     folder = move_files()
-    tags = ", ".join([control.text for control in tags.controls])
-    e.page.go("/begin_upload")
-    text = run(extract_text(folder, ocr, nlp))
-    insert_doc(folder, tags, text)
+    tags = [control.text for control in tags.controls]
+    clear_view(event)
+    text = run(extract_text(folder, ocr))  # , nlp))
+    embed = get_embedding(text, nlp)
+    insert(embed, folder, tags)
+    event.page.show_snack_bar(
+        SnackBar(
+            content=Text(value="Successfully saved document"),
+            open=True,
+            bgcolor="#238636",
+        )
+    )
+    event.page.update()
 
 
 def create_edit_upload_page(page: Page, ocr, nlp) -> None:
@@ -122,6 +135,8 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
     rel_dir = "data/temp"
     # Get the absolute path of the directory containing the script
     script_dir = dirname(abspath(__file__))
+    with open("./data.txt", "w") as file:
+        file.write(script_dir)
     script_dir = "/".join(script_dir.split("\\")[:-2])
     # Get the absolute path of the directory containing the files to be listed
     abs_dir = join(script_dir, rel_dir)
@@ -142,74 +157,99 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                 expand=True,
                 controls=[
                     Image(src=f"{abs_dir}/{file}", width=3 * 192, height=3 * 108),
-                    ElevatedButton("Remove", on_click=lambda e: remove_btn(e, lv)),
+                    ElevatedButton("Remove", on_click=partial(remove_btn, lv=lv)),
                 ],
             )
         )
 
-    page.controls.append(
-        Row(
-            expand=True,
+    page.views.append(
+        View(
+            route="/edit_upload",
             controls=[
-                Column(
+                Row(
                     expand=True,
                     controls=[
-                        ElevatedButton(
-                            text="Upload more files",
-                            on_click=lambda _: page.overlay[0].pick_files(
-                                file_type=FilePickerFileType.IMAGE, allow_multiple=True
-                            ),
-                        ),
-                        lv,
-                    ],
-                ),
-                Column(
-                    controls=[
-                        Row(
+                        Column(
+                            expand=True,
                             controls=[
-                                tag_drop,
                                 ElevatedButton(
-                                    text="Select",
-                                    on_click=lambda e: select_tag(e, tags, tag_drop),
-                                ),
-                                OutlinedButton(
-                                    text="Disselect",
-                                    on_click=lambda e: disselect_tag(e, tags, tag_drop),
-                                ),
-                                FilledButton(
-                                    text="Delete",
-                                    on_click=lambda e: delete_tag(e, tag_drop),
-                                ),
-                            ],
-                        ),
-                        Row(
-                            controls=[
-                                tag_input_field,
-                                ElevatedButton(
-                                    text="Create",
-                                    on_click=lambda e: create_tag(
-                                        tag_drop, tag_input_field.value, e
+                                    text="Upload more files",
+                                    on_click=lambda _: page.overlay[0].pick_files(
+                                        file_type=FilePickerFileType.IMAGE,
+                                        allow_multiple=True,
                                     ),
                                 ),
+                                lv,
                             ],
                         ),
-                        Text(value="Currently Selected Tags:"),
-                        tags,
-                        Row(
+                        Column(
                             controls=[
-                                OutlinedButton(
-                                    text="Discard",
-                                    on_click=lambda _: page.go("/begin_upload"),
+                                Row(
+                                    controls=[
+                                        tag_drop,
+                                        ElevatedButton(
+                                            text="Select",
+                                            on_click=partial(
+                                                select_tag,
+                                                btns=tags,
+                                                drop=tag_drop,
+                                            ),
+                                        ),
+                                        OutlinedButton(
+                                            text="Disselect",
+                                            on_click=partial(
+                                                disselect_tag,
+                                                btns=tags,
+                                                drop=tag_drop,
+                                            ),
+                                        ),
+                                        FilledButton(
+                                            text="Delete",
+                                            on_click=partial(
+                                                delete_tag,
+                                                drop=tag_drop,
+                                                text=tag_input_field,
+                                            ),
+                                        ),
+                                    ],
                                 ),
-                                ElevatedButton(
-                                    text="Save",
-                                    on_click=lambda e: save(e, tags, ocr, nlp),
+                                Row(
+                                    controls=[
+                                        tag_input_field,
+                                        ElevatedButton(
+                                            text="Create",
+                                            on_click=partial(
+                                                create_tag,
+                                                drop=tag_drop,
+                                                text=tag_input_field,
+                                            ),
+                                        ),
+                                    ],
                                 ),
-                            ]
+                                Text(value="Currently Selected Tags:"),
+                                tags,
+                                Row(
+                                    controls=[
+                                        OutlinedButton(
+                                            text="Discard",
+                                            on_click=clear_view,
+                                        ),
+                                        ElevatedButton(
+                                            text="Save",
+                                            on_click=partial(
+                                                save,
+                                                tags=tags,
+                                                ocr=ocr,
+                                                nlp=nlp,
+                                            ),
+                                        ),
+                                    ]
+                                ),
+                            ],
+                            expand=True,
                         ),
                     ],
-                    expand=True,
-                ),
+                )
             ],
         )
     )
