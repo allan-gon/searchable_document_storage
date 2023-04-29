@@ -135,8 +135,6 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
     rel_dir = "data/temp"
     # Get the absolute path of the directory containing the script
     script_dir = dirname(abspath(__file__))
-    with open("./data.txt", "w") as file:
-        file.write(script_dir)
     script_dir = "/".join(script_dir.split("\\")[:-2])
     # Get the absolute path of the directory containing the files to be listed
     abs_dir = join(script_dir, rel_dir)
