@@ -1,3 +1,9 @@
+# Notes for others
+- this will no run properly because the model and data folders are missing.
+- this is expected as they are git ignored because too big
+- if you somehow figure out what is in those folders and get it run the startup is slow because models get loaded
+
+# Notes for self
 ```
 actual: pyinstaller -w --icon=icon.ico --hidden-import=dbm.dumb --add-data "model;model" --noconfirm main.py
 debug: pyinstaller --icon=icon.ico --hidden-import=dbm.dumb --add-data "model;model" --noconfirm main.py
