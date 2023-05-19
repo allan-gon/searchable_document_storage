@@ -4,7 +4,6 @@ from src.helper import create_nav_bar, setup, copy_selected_files
 from src.pages.upload import create_init_upload_page
 from src.pages.edit_upload import create_edit_upload_page
 from src.pages.search import create_search_page
-from src.pages.tbd import tbd
 
 
 def main(page: Page):
@@ -29,8 +28,6 @@ def main(page: Page):
                 create_init_upload_page(page)
             case "/edit_upload":
                 create_edit_upload_page(page, ocr, nlp)
-            case "/tbd":
-                tbd(page)
         page.update()
 
     page.on_route_change = route_change

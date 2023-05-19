@@ -18,3 +18,12 @@ cp -r ./model ./dist
 ```
 - i think it fails to make the view because the dir thing again but because all one binary abs dir is wrong
 - the flet thing makes icon work but teh edit_upload view isn't made
+
+# TODO
+- make seeing a document pdf not yucky webpage thing
+- refactor
+- document
+- make single binaray except data, model folder
+    - make setup/installer file
+- speed up startup
+    - use larger spacy model

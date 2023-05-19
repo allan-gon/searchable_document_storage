@@ -30,7 +30,6 @@ def create_nav_bar(page: Page) -> NavigationBar:
         destinations=[
             NavigationDestination(icon=icons.SEARCH),
             NavigationDestination(icon=icons.FILE_UPLOAD),
-            NavigationDestination(icon=icons.QUESTION_MARK),
         ],
         selected_index=0,
         on_change=lambda e: page.go(ROUTES[e.control.selected_index]),

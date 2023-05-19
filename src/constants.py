@@ -4,7 +4,7 @@ WIDTH = 1920
 HEIGHT = 1080
 
 # used for navigation
-ROUTES = ["/search", "/begin_upload", "/tbd", "/edit_upload"]
+ROUTES = ["/search", "/begin_upload", "/edit_upload"]
 
 VEC_DB_DIR = "./data/db"
 COLLECTION_NAME = "docs"
