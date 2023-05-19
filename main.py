@@ -1,9 +1,12 @@
-from flet import app, FilePicker, Page
+# my code
 from src.constants import WIDTH, HEIGHT
 from src.helper import create_nav_bar, setup, copy_selected_files
 from src.pages.upload import create_init_upload_page
 from src.pages.edit_upload import create_edit_upload_page
 from src.pages.search import create_search_page
+
+# Packages
+from flet import app, FilePicker, Page
 
 
 def main(page: Page):

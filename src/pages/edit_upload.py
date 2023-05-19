@@ -1,6 +1,15 @@
-from os.path import dirname, abspath, join
+# built-in
+from functools import partial
+from asyncio import run
 from os import remove, listdir, mkdir
+from os.path import abspath
 from shutil import move
+
+# my code
+from src.helper import insert, get_embedding, clear_view
+from src.constants import TAGS_FILE, DOCS_DIR, TEMP_DIR
+
+# packages
 from flet import (
     Row,
     Page,
@@ -19,9 +28,6 @@ from flet import (
     View,
     SnackBar,
 )
-from src.helper import insert, get_embedding, clear_view
-from functools import partial
-from asyncio import run
 
 
 def create_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
@@ -31,7 +37,7 @@ def create_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
                 break
         else:
             drop.options.append(dropdown.Option(text.value))
-            with open("./data/tags", "w") as file:
+            with open(TAGS_FILE, "w") as file:
                 file.write("\n".join([option.key for option in drop.options]))
             event.page.update()
 
@@ -62,7 +68,7 @@ def delete_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
             if option.key == drop.value:
                 drop.options.remove(option)
                 text.value = ""
-                with open("./data/tags", "w") as file:
+                with open(TAGS_FILE, "w") as file:
                     file.write("\n".join([option.key for option in drop.options]))
                 event.page.update()
                 break
@@ -79,18 +85,18 @@ def remove_btn(event: ControlEvent, lv: ListView) -> None:
 
 
 def create_folder_name() -> str:
-    if not listdir("./data/docs"):
-        return "./data/docs/doc_1"
+    if not listdir(DOCS_DIR):
+        return f"{DOCS_DIR}/doc_1"
     else:
-        max_num = int(listdir("./data/docs")[-1].split("_")[-1])
-        return f"./data/docs/doc_{max_num + 1}"
+        max_num = int(listdir(DOCS_DIR)[-1].split("_")[-1])
+        return f"{DOCS_DIR}/doc_{max_num + 1}"
 
 
 def move_files() -> str:
     folder = create_folder_name()
     mkdir(folder)
-    for file in listdir("./data/temp"):
-        move(f"./data/temp/{file}", folder)
+    for file in listdir(TEMP_DIR):
+        move(f"{TEMP_DIR}/{file}", folder)
     return folder
 
 
@@ -128,19 +134,10 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
         controls=[],
         width=page.width // 4,
     )
-
-    # the following path nonsense is because of a problem loading images
-    # that get copied to a folder using relative path
-    # flet doesn't load the images so abs path is required to make it work
-    rel_dir = "data/temp"
-    # Get the absolute path of the directory containing the script
-    script_dir = dirname(abspath(__file__))
-    script_dir = "/".join(script_dir.split("\\")[:-2])
-    # Get the absolute path of the directory containing the files to be listed
-    abs_dir = join(script_dir, rel_dir)
+    abs_dir = abspath("./data/temp")
 
     # load saved tags
-    with open("./data/tags", "r") as file:
+    with open(TAGS_FILE, "r") as file:
         saved_tags_text = [tag.strip() for tag in file.readlines()]
 
     # Dropdown and TextField needed for callback

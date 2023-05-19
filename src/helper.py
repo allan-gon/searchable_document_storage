@@ -1,3 +1,23 @@
+# built-in
+from os.path import exists, abspath
+from os import mkdir, listdir, remove
+from shutil import copy
+from webbrowser import open as web_open
+
+# my code
+from src.constants import (
+    ROUTES,
+    SPACY_MODEL_PATH,
+    DATA_DIR,
+    TEMP_DIR,
+    DOCS_DIR,
+    TAGS_FILE,
+    VEC_DB_DIR,
+    COLLECTION_NAME,
+    PDF_NAME,
+)
+
+# packages
 from flet import (
     Page,
     NavigationBar,
@@ -6,12 +26,6 @@ from flet import (
     FilePickerResultEvent,
     ControlEvent,
 )
-from src.constants import ROUTES, COLLECTION_NAME, VEC_DB_DIR
-from tempfile import NamedTemporaryFile
-from webbrowser import open as web_open
-from os.path import exists, join
-from os import mkdir, listdir
-from shutil import copy
 from spacy import load
 from easyocr import Reader
 from qdrant_client import QdrantClient
@@ -23,6 +37,7 @@ from qdrant_client.http.models import (
     FieldCondition,
     MatchValue,
 )
+from img2pdf import convert
 
 
 def create_nav_bar(page: Page) -> NavigationBar:
@@ -38,21 +53,20 @@ def create_nav_bar(page: Page) -> NavigationBar:
 
 def ensure_folders_exist() -> None:
     # create folders if they're missing
-    if not exists("./data/"):
-        mkdir("./data")
-        mkdir("./data/temp")
+    if not exists(DATA_DIR):
+        mkdir(DATA_DIR)
 
-    if not exists("./data/temp"):
-        mkdir("./data/temp")
+    if not exists(TEMP_DIR):
+        mkdir(TEMP_DIR)
 
-    if not exists("./data/docs"):
-        mkdir("./data/docs")
+    if not exists(DOCS_DIR):
+        mkdir(DOCS_DIR)
 
 
 def ensure_tags_exist() -> None:
     # create file if missing
-    if not exists("./data/tags"):
-        with open("./data/tags", "w") as file:
+    if not exists(TAGS_FILE):
+        with open(TAGS_FILE, "w"):
             pass
 
 
@@ -88,18 +102,18 @@ def insert(embedding: list[float], folder: str, tags: list[str]) -> None:
 def setup() -> tuple:
     # necessary because my local version will have stuff in it
     # and it would suck to have to clear it every time I update
-    # and ship the app. Instead those folders/files are ommited
+    # and ship the app. Instead those folders/files are omitted
     # by default an made on 1st app start
     ensure_folders_exist()
     ensure_tags_exist()
     ensure_db_exists()
-    return Reader(["en"]), load("./model/en_core_web_sm-3.5.0")
+    return Reader(["en"]), load(SPACY_MODEL_PATH)
 
 
 def intermediate(res: FilePickerResultEvent, route: str) -> None:
     """
     Needed to refresh page since that only happens on route change.
-    Refeshing, to the user, doesn't mean changing pages so behing the
+    Refreshing, to the user, doesn't mean changing pages so behind the
     scenes I change the route then return so the on route change event
     triggers and page is refreshed
     """
@@ -112,8 +126,8 @@ def intermediate(res: FilePickerResultEvent, route: str) -> None:
 def copy_selected_files(res: FilePickerResultEvent) -> None:
     if res.files:
         for file in res.files:
-            if file not in listdir("./data/temp"):
-                copy(file.path, "./data/temp")
+            if file not in listdir(TEMP_DIR):
+                copy(file.path, TEMP_DIR)
     intermediate(res, "/edit_upload")
 
 
@@ -133,7 +147,7 @@ def get_embedding(text, nlp):
 
 
 def find_docs(tags: list[str], query: str, nlp) -> list[str]:
-    # if nothing is entered then whitespace minumum for spacy to embed
+    # if nothing is entered then whitespace minimum for spacy to embed
     client = QdrantClient(path=VEC_DB_DIR)
     embed = get_embedding(query, nlp)
     if tags:
@@ -157,22 +171,24 @@ def find_docs(tags: list[str], query: str, nlp) -> list[str]:
     return [result.payload["folder_name"] for result in search_result]
 
 
-def display_folder(folder: str) -> None:
-    # Generate HTML content
-    html_content = "<html><head></head><body>"
-    for filename in listdir(folder):
-        file_path = join(folder, filename)
-        html_content += f'<img src="file://{file_path}" alt="{filename}" />'
-    html_content += "</body></html>"
-
-    # Create a temporary HTML file
-    with NamedTemporaryFile(suffix=".html", delete=False) as temp:
-        temp.write(html_content.encode("utf-8"))
-
-    # Open the temporary HTML file in the default browser
-    web_open("file://" + temp.name)
-
-
 def clear_view(event: ControlEvent) -> None:
     event.page.views.pop()
     event.page.update()
+
+
+def clear_folder(folder) -> None:
+    """Remove files from a specified folder, usually the TEMP_DIR"""
+    for file in listdir(folder):
+        remove(f"{folder}/{file}")
+
+
+def create_pdf(image_paths: list[str]) -> None:
+    """Create a pdf out of images specified here, save it to TEMP_DIR"""
+    with open(f"{TEMP_DIR}/{PDF_NAME}", "wb") as file:
+        file.write(convert(image_paths))
+
+
+def launch_pdf() -> None:
+    """Launch pdf in TEMP_DIR for viewing in browser"""
+    abs_path = abspath(f"{TEMP_DIR}/{PDF_NAME}")
+    web_open(abs_path)

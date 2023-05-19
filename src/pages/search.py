@@ -1,3 +1,14 @@
+# built-ins
+from functools import partial
+from os.path import abspath
+from os import listdir
+
+# my code
+from src.pages.edit_upload import select_tag, disselect_tag
+from src.constants import DOCS_DIR, TAGS_FILE, TEMP_DIR
+from src.helper import find_docs, create_pdf, launch_pdf, clear_folder
+
+# packages
 from flet import (
     Page,
     TextField,
@@ -13,26 +24,23 @@ from flet import (
     ImageFit,
     ImageRepeat,
     border_radius,
-    Container,
     Text,
 )
-from src.pages.edit_upload import select_tag, disselect_tag
-from src.helper import find_docs, display_folder
-from os.path import dirname, abspath, join
-from os import listdir
-from functools import partial
+
+
+def launch_doc(event: ControlEvent, lv: ListView) -> None:
+    for row in lv.controls:
+        if row.controls[-1] == event.control:
+            images = [image.src for image in row.controls[1:-1]]
+            clear_folder(TEMP_DIR)
+            create_pdf(images)
+            launch_pdf()
 
 
 def populate_results(
     event: ControlEvent, tags: Row, text_field: TextField, nlp
 ) -> None:
-    # abs path nonsense for images when moved
-    rel_dir = "data/docs"
-    # Get the absolute path of the directory containing the script
-    script_dir = dirname(abspath(__file__))
-    script_dir = "/".join(script_dir.split("\\")[:-2])
-    # Get the absolute path of the directory containing the files to be listed
-    abs_dir = join(script_dir, rel_dir)
+    abs_dir = abspath(DOCS_DIR)
 
     docs = find_docs([control.text for control in tags.controls], text_field.value, nlp)
 
@@ -43,22 +51,21 @@ def populate_results(
         row.controls.append(Text(value=idx))
         for file in listdir(doc):
             row.controls.append(
-                Container(
-                    content=Image(
-                        # TODO: fix this nonsense. the folder name stuff requires
-                        # changing a few functions
-                        src=f"{abs_dir}/{doc.split('/')[-1]}/{file}",
-                        width=200,
-                        height=200,
-                        fit=ImageFit.CONTAIN,
-                        repeat=ImageRepeat.NO_REPEAT,
-                        border_radius=border_radius.all(10),
-                    ),
-                    on_click=lambda _: display_folder(
-                        f"{abs_dir}/{doc.split('/')[-1]}"
-                    ),
-                )
+                Image(
+                    # TODO: fix this nonsense. the folder name stuff requires
+                    # changing a few functions
+                    src=f"{abs_dir}/{doc.split('/')[-1]}/{file}",
+                    width=200,
+                    height=200,
+                    fit=ImageFit.CONTAIN,
+                    repeat=ImageRepeat.NO_REPEAT,
+                    border_radius=border_radius.all(10),
+                ),
             )
+        row.controls.append(
+            ElevatedButton(text="View", on_click=partial(launch_doc, lv=lv))
+        )
+
         lv.controls.append(row)
     event.page.update()
 
@@ -75,7 +82,7 @@ def create_search_page(page: Page, nlp) -> None:
     )
 
     # load saved tags
-    with open("./data/tags", "r") as file:
+    with open(TAGS_FILE, "r") as file:
         saved_tags_text = [tag.strip() for tag in file.readlines()]
 
     tag_drop = Dropdown(options=[dropdown.Option(text) for text in saved_tags_text])

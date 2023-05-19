@@ -1,11 +1,14 @@
+# my code
+from src.constants import TEMP_DIR
+from src.helper import clear_folder
+
+# packages
 from flet import Page, ElevatedButton, Text, FilePickerFileType
-from os import listdir, remove
 
 
 def create_init_upload_page(page: Page) -> None:
     page.controls.clear()
-    for file in listdir("./data/temp"):
-        remove(f"./data/temp/{file}")
+    clear_folder(TEMP_DIR)
     page.controls.append(Text("Only select images from a single file"))
     page.controls.append(
         ElevatedButton(

@@ -20,10 +20,13 @@ cp -r ./model ./dist
 - the flet thing makes icon work but teh edit_upload view isn't made
 
 # TODO
-- make seeing a document pdf not yucky webpage thing
-- refactor
-- document
-- make single binaray except data, model folder
-    - make setup/installer file
+- when uploading view misbehaves. possibly related to 1st image or to an empty folder
+- make setup/installer file
 - speed up startup
     - use larger spacy model
+
+- to check if works as binary
+```
+pyinstaller --hidden-import=dbm.dumb --noconfirm --onefile main.py
+```
+- btw manually moved model folder into that dir
