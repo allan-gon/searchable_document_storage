@@ -1,7 +1,7 @@
 # To build
 
 ```
-flet pack .\main.py --icon image.png --hidden-import=dbm.dumb
+flet pack .\main.py --icon icon.ico --hidden-import=dbm.dumb
 ```
 - once this finishes move the model folder (omitted on github) into the dist folder
 
