@@ -17,7 +17,6 @@ def main(page: Page):
     page.title = "File Storage"
     page.window_width = WIDTH
     page.window_height = HEIGHT
-    page.window_resizable = False
     # File picker needed in upload and edit_upload page
     page.overlay.append(FilePicker(on_result=copy_selected_files))
 

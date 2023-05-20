@@ -1,32 +1,27 @@
-# Notes for others
-- this will no run properly because the model and data folders are missing.
-- this is expected as they are git ignored because too big
-- if you somehow figure out what is in those folders and get it run the startup is slow because models get loaded
-
-# Notes for self
-```
-actual: pyinstaller -w --icon=icon.ico --hidden-import=dbm.dumb --add-data "model;model" --noconfirm main.py
-debug: pyinstaller --icon=icon.ico --hidden-import=dbm.dumb --add-data "model;model" --noconfirm main.py
-```
-- if create tag then delete, drop down till have value
-- maybe pack just the app
-- copy over the model, data gets made auto
+# To build
 
 ```
-flet pack .\main.py --icon icon.ico --hidden-import=dbm.dumb
-cp -r ./model ./dist
+flet pack .\main.py --icon image.png --hidden-import=dbm.dumb
 ```
-- i think it fails to make the view because the dir thing again but because all one binary abs dir is wrong
-- the flet thing makes icon work but teh edit_upload view isn't made
+- once this finishes move the model folder (omitted on github) into the dist folder
+
+# To install
+- download and run this installer: https://tinyurl.com/5n7rhtb6
+    - **NOTE**: will obviously be detected as virus since it's a python exe. Simply allow it as a threat once it's quarantined and when running the installer click run anyways
 
 # TODO
 - when uploading view misbehaves. possibly related to 1st image or to an empty folder
-- make setup/installer file
 - speed up startup
     - use larger spacy model
+- Known issues. If screen resolution is not 1920 x 1080 or more precisely scaling is non-standard some ui elements are moved and become unusable in the edit_upload
 
+# Dev stuff
 - to check if works as binary
 ```
 pyinstaller --hidden-import=dbm.dumb --noconfirm --onefile main.py
 ```
 - btw manually moved model folder into that dir
+
+# Changes
+- everything seems to work but need thorough check
+- figure out where function out to go im throwing eveything that is used in more than one file or can be general into helper and it's tarting to get crowded

@@ -3,6 +3,7 @@ from os.path import exists, abspath
 from os import mkdir, listdir, remove
 from shutil import copy
 from webbrowser import open as web_open
+from functools import partial
 
 # my code
 from src.constants import (
@@ -25,6 +26,13 @@ from flet import (
     icons,
     FilePickerResultEvent,
     ControlEvent,
+    FilePickerFileType,
+    SnackBar,
+    Text,
+    ListView,
+    Row,
+    Image,
+    ElevatedButton,
 )
 from spacy import load
 from easyocr import Reader
@@ -40,6 +48,46 @@ from qdrant_client.http.models import (
 from img2pdf import convert
 
 
+def remove_btn(event: ControlEvent, lv: ListView) -> None:
+    for row in lv.controls:
+        if row.controls[-1] == event.control:
+            remove(row.controls[0].src)
+            lv.controls.remove(row)
+
+            break
+    event.page.update()
+
+
+def populate_listview(lv: ListView) -> None:
+    lv.controls.clear()
+    abs_dir = abspath(TEMP_DIR)
+    for file in listdir(abs_dir):
+        # a row in the list view is 2/3 image and 1/3 button
+        lv.controls.append(
+            Row(
+                expand=True,
+                controls=[
+                    Image(
+                        expand=2, src=f"{abs_dir}/{file}", width=3 * 192, height=3 * 108
+                    ),
+                    ElevatedButton(
+                        expand=1, text="Remove", on_click=partial(remove_btn, lv=lv)
+                    ),
+                ],
+            )
+        )
+
+
+def upload_dialog(event: ControlEvent) -> None:
+    event.page.overlay[0].pick_files(
+        file_type=FilePickerFileType.IMAGE, allow_multiple=True
+    )
+
+
+def switch_routes(event: ControlEvent) -> None:
+    event.page.go(ROUTES[event.control.selected_index])
+
+
 def create_nav_bar(page: Page) -> NavigationBar:
     return NavigationBar(
         destinations=[
@@ -47,7 +95,7 @@ def create_nav_bar(page: Page) -> NavigationBar:
             NavigationDestination(icon=icons.FILE_UPLOAD),
         ],
         selected_index=0,
-        on_change=lambda e: page.go(ROUTES[e.control.selected_index]),
+        on_change=partial(switch_routes),
     )
 
 
@@ -128,7 +176,22 @@ def copy_selected_files(res: FilePickerResultEvent) -> None:
         for file in res.files:
             if file not in listdir(TEMP_DIR):
                 copy(file.path, TEMP_DIR)
-    intermediate(res, "/edit_upload")
+
+        # after files are copied need to go to edit_upload
+        if res.page.route != "/edit_upload":
+            res.page.go("/edit_upload")
+        else:
+            # if already on edit_upload simply need to update lv
+            populate_listview(res.page.views[-1].controls[0].controls[0].controls[-1])
+            res.page.update()
+
+    else:
+        # this red may be too harsh
+        res.page.show_snack_bar(
+            SnackBar(
+                content=Text(value="No images selected"), open=True, bgcolor="#FF3030"
+            )
+        )
 
 
 def remove_stops_and_lemmatize(doc):

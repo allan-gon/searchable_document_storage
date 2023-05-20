@@ -1,9 +1,12 @@
+# built-ins
+from functools import partial
+
 # my code
 from src.constants import TEMP_DIR
-from src.helper import clear_folder
+from src.helper import clear_folder, upload_dialog
 
 # packages
-from flet import Page, ElevatedButton, Text, FilePickerFileType
+from flet import Page, ElevatedButton, Text, FilePickerFileType, ControlEvent
 
 
 def create_init_upload_page(page: Page) -> None:
@@ -13,8 +16,6 @@ def create_init_upload_page(page: Page) -> None:
     page.controls.append(
         ElevatedButton(
             text="Upload",
-            on_click=lambda _: page.overlay[0].pick_files(
-                file_type=FilePickerFileType.IMAGE, allow_multiple=True
-            ),
+            on_click=partial(upload_dialog),
         )
     )

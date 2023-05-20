@@ -1,12 +1,17 @@
 # built-in
 from functools import partial
 from asyncio import run
-from os import remove, listdir, mkdir
-from os.path import abspath
+from os import listdir, mkdir
 from shutil import move
 
 # my code
-from src.helper import insert, get_embedding, clear_view
+from src.helper import (
+    insert,
+    get_embedding,
+    clear_view,
+    upload_dialog,
+    populate_listview,
+)
 from src.constants import TAGS_FILE, DOCS_DIR, TEMP_DIR
 
 # packages
@@ -74,16 +79,6 @@ def delete_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
                 break
 
 
-def remove_btn(event: ControlEvent, lv: ListView) -> None:
-    for row in lv.controls:
-        if row.controls[-1] == event.control:
-            remove(row.controls[0].src)
-            lv.controls.remove(row)
-
-            break
-    event.page.update()
-
-
 def create_folder_name() -> str:
     if not listdir(DOCS_DIR):
         return f"{DOCS_DIR}/doc_1"
@@ -128,34 +123,27 @@ def save(event: ControlEvent, tags: Row, ocr, nlp) -> None:
 def create_edit_upload_page(page: Page, ocr, nlp) -> None:
     # control that will hold buttons that represent selected tags
     tags = Row(
+        # expand=1,
         wrap=True,
         spacing=10,
         run_spacing=10,
         controls=[],
         width=page.width // 4,
     )
-    abs_dir = abspath("./data/temp")
 
     # load saved tags
     with open(TAGS_FILE, "r") as file:
         saved_tags_text = [tag.strip() for tag in file.readlines()]
 
     # Dropdown and TextField needed for callback
-    tag_drop = Dropdown(options=[dropdown.Option(text) for text in saved_tags_text])
-    tag_input_field = TextField(hint_text="tag to create")
+    tag_drop = Dropdown(
+        expand=3, options=[dropdown.Option(text) for text in saved_tags_text]
+    )
+    tag_input_field = TextField(expand=1, hint_text="tag to create")
 
     # List View of images and remove buttons
-    lv = ListView(expand=True, spacing=10, padding=20)
-    for file in listdir(abs_dir):
-        lv.controls.append(
-            Row(
-                expand=True,
-                controls=[
-                    Image(src=f"{abs_dir}/{file}", width=3 * 192, height=3 * 108),
-                    ElevatedButton("Remove", on_click=partial(remove_btn, lv=lv)),
-                ],
-            )
-        )
+    lv = ListView(expand=True, spacing=10)
+    populate_listview(lv)
 
     page.views.append(
         View(
@@ -165,24 +153,24 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                     expand=True,
                     controls=[
                         Column(
-                            expand=True,
+                            expand=1,
                             controls=[
                                 ElevatedButton(
                                     text="Upload more files",
-                                    on_click=lambda _: page.overlay[0].pick_files(
-                                        file_type=FilePickerFileType.IMAGE,
-                                        allow_multiple=True,
-                                    ),
+                                    on_click=partial(upload_dialog),
                                 ),
                                 lv,
                             ],
                         ),
                         Column(
+                            expand=1,
                             controls=[
                                 Row(
+                                    # expand=1,
                                     controls=[
                                         tag_drop,
                                         ElevatedButton(
+                                            expand=1,
                                             text="Select",
                                             on_click=partial(
                                                 select_tag,
@@ -191,6 +179,7 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                             ),
                                         ),
                                         OutlinedButton(
+                                            expand=1,
                                             text="Disselect",
                                             on_click=partial(
                                                 disselect_tag,
@@ -199,6 +188,7 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                             ),
                                         ),
                                         FilledButton(
+                                            expand=1,
                                             text="Delete",
                                             on_click=partial(
                                                 delete_tag,
@@ -209,9 +199,11 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                     ],
                                 ),
                                 Row(
+                                    # expand=1,
                                     controls=[
                                         tag_input_field,
                                         ElevatedButton(
+                                            expand=1,
                                             text="Create",
                                             on_click=partial(
                                                 create_tag,
@@ -221,15 +213,21 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                         ),
                                     ],
                                 ),
-                                Text(value="Currently Selected Tags:"),
+                                Text(
+                                    # expand=1,
+                                    value="Currently Selected Tags:"
+                                ),
                                 tags,
                                 Row(
+                                    # expand=1,
                                     controls=[
                                         OutlinedButton(
+                                            expand=1,
                                             text="Discard",
                                             on_click=clear_view,
                                         ),
                                         ElevatedButton(
+                                            expand=1,
                                             text="Save",
                                             on_click=partial(
                                                 save,
@@ -238,10 +236,9 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                                 nlp=nlp,
                                             ),
                                         ),
-                                    ]
+                                    ],
                                 ),
                             ],
-                            expand=True,
                         ),
                     ],
                 )
