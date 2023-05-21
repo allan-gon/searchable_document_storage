@@ -1,9 +1,13 @@
+# built-ins
+from functools import partial
+
 # my code
-from src.constants import WIDTH, HEIGHT
-from src.helper import create_nav_bar, setup, copy_selected_files
+from util.constants import WIDTH, HEIGHT
 from src.pages.upload import create_init_upload_page
-from src.pages.edit_upload import create_edit_upload_page
+
+# from src.pages.edit_upload import create_edit_upload_page
 from src.pages.search import create_search_page
+from util.main_util import create_nav_bar, setup, copy_selected_files
 
 # Packages
 from flet import app, FilePicker, Page
@@ -18,7 +22,9 @@ def main(page: Page):
     page.window_width = WIDTH
     page.window_height = HEIGHT
     # File picker needed in upload and edit_upload page
-    page.overlay.append(FilePicker(on_result=copy_selected_files))
+    page.overlay.append(
+        FilePicker(on_result=partial(copy_selected_files, ocr=ocr, nlp=nlp))
+    )
 
     def route_change(_):
         """Handles navigation"""
@@ -28,8 +34,8 @@ def main(page: Page):
                 create_search_page(page, nlp)
             case "/begin_upload":
                 create_init_upload_page(page)
-            case "/edit_upload":
-                create_edit_upload_page(page, ocr, nlp)
+            # case "/edit_upload":
+            #     create_edit_upload_page(page, ocr, nlp)
         page.update()
 
     page.on_route_change = route_change

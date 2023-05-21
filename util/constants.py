@@ -4,7 +4,7 @@ WIDTH = 1920 // 2
 HEIGHT = 1080 // 2
 
 # used for navigation
-ROUTES = ["/search", "/begin_upload", "/edit_upload"]
+ROUTES = ["/search", "/begin_upload"]
 # all relative to root folder
 SPACY_MODEL_PATH = "./model/en_core_web_sm-3.5.0"
 DATA_DIR = "./data"

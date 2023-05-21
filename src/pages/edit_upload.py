@@ -1,17 +1,16 @@
 # built-in
 from functools import partial
-from asyncio import run
-from os import listdir, mkdir
-from shutil import move
 
 # my code
-from src.helper import (
-    insert,
-    get_embedding,
-    clear_view,
+from util.constants import TAGS_FILE
+from util.edit_upload_util import (
+    discard,
+    create_tag,
+    delete_tag,
+    save,
     populate_listview,
 )
-from src.constants import TAGS_FILE, DOCS_DIR, TEMP_DIR
+from util.shared_util import select_tag, deselect_tag
 
 # packages
 from flet import (
@@ -26,107 +25,8 @@ from flet import (
     Dropdown,
     dropdown,
     TextField,
-    ControlEvent,
     View,
-    SnackBar,
 )
-
-
-def discard(event: ControlEvent) -> None:
-    clear_view(event)
-    event.page.show_snack_bar(
-        SnackBar(
-            content=Text(value="Document Discarded"),
-            open=True,
-            bgcolor="#FF3030",
-        )
-    )
-    event.page.update()
-
-
-def create_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
-    if text:
-        for option in drop.options:
-            if option.key == text.value:
-                break
-        else:
-            drop.options.append(dropdown.Option(text.value))
-            with open(TAGS_FILE, "w") as file:
-                file.write("\n".join([option.key for option in drop.options]))
-            event.page.update()
-
-
-def select_tag(event: ControlEvent, btns: Row, drop: Dropdown) -> None:
-    # when deleted, value must be changed
-    if drop.value:
-        for btn in btns.controls:
-            if drop.value == btn.text:
-                break
-        else:
-            btns.controls.append(ElevatedButton(text=drop.value))
-            event.page.update()
-
-
-def disselect_tag(event: ControlEvent, btns: Row, drop: Dropdown) -> None:
-    if drop.value:
-        for btn in btns.controls:
-            if btn.text == drop.value:
-                btns.controls.remove(btn)
-                event.page.update()
-                break
-
-
-def delete_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
-    if drop.value:
-        for option in drop.options:
-            if option.key == drop.value:
-                drop.options.remove(option)
-                text.value = ""
-                with open(TAGS_FILE, "w") as file:
-                    file.write("\n".join([option.key for option in drop.options]))
-                event.page.update()
-                break
-
-
-def create_folder_name() -> str:
-    if not listdir(DOCS_DIR):
-        return f"{DOCS_DIR}/doc_1"
-    else:
-        max_num = int(listdir(DOCS_DIR)[-1].split("_")[-1])
-        return f"{DOCS_DIR}/doc_{max_num + 1}"
-
-
-def move_files() -> str:
-    folder = create_folder_name()
-    mkdir(folder)
-    for file in listdir(TEMP_DIR):
-        move(f"{TEMP_DIR}/{file}", folder)
-    return folder
-
-
-async def extract_text(folder: str, ocr) -> str:
-    full_text = ""
-    for file in listdir(folder):
-        content = ocr.readtext(f"{folder}/{file}", detail=0)
-        full_text += " " + " ".join(content)
-    return full_text
-
-
-def save(event: ControlEvent, tags: Row, ocr, nlp) -> None:
-    folder = move_files()
-    tags = [control.text for control in tags.controls]
-    clear_view(event)
-    text = run(extract_text(folder, ocr))  # , nlp))
-    embed = get_embedding(text, nlp)
-    insert(embed, folder, tags)
-    event.page.show_snack_bar(
-        SnackBar(
-            content=Text(value="Successfully saved document"),
-            open=True,
-            bgcolor="#238636",
-        )
-    )
-    event.page.update()
 
 
 def create_edit_upload_page(page: Page, ocr, nlp) -> None:
@@ -171,7 +71,6 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                             expand=1,
                             controls=[
                                 Row(
-                                    # expand=1,
                                     controls=[
                                         tag_drop,
                                         ElevatedButton(
@@ -185,9 +84,9 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                         ),
                                         OutlinedButton(
                                             expand=1,
-                                            text="Disselect",
+                                            text="Deselect",
                                             on_click=partial(
-                                                disselect_tag,
+                                                deselect_tag,
                                                 btns=tags,
                                                 drop=tag_drop,
                                             ),
@@ -204,7 +103,6 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                     ],
                                 ),
                                 Row(
-                                    # expand=1,
                                     controls=[
                                         tag_input_field,
                                         ElevatedButton(
@@ -218,13 +116,9 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                         ),
                                     ],
                                 ),
-                                Text(
-                                    # expand=1,
-                                    value="Currently Selected Tags:"
-                                ),
+                                Text(value="Currently Selected Tags:"),
                                 tags,
                                 Row(
-                                    # expand=1,
                                     controls=[
                                         OutlinedButton(
                                             expand=1,
@@ -250,3 +144,4 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
             ],
         )
     )
+    page.update()
