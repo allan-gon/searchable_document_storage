@@ -19,3 +19,46 @@ flet pack .\main.py --icon icon.ico --hidden-import=dbm.dumb
 pyinstaller --hidden-import=dbm.dumb --noconfirm --onefile main.py
 ```
 - btw manually moved model folder into that dir
+
+# Tests
+- **NOTE** any points which aren't sequential are yet to be tested
+
+## Basic
+- app starts up
+- icon appears correctly on exe
+- icon appears correctly on running app
+- correct file structure is created (mainly the data folder and it's content)
+- can navigate between search and upload page via the nav bar
+- window is re-sizable
+
+## Search Page
+- searching an empty db does nothing
+- select/deselect empty tags does nothing
+- contains search bar/button
+- contains tag dropdown and accompanying select/deselect
+
+- filterable
+- selecting/deselecting when dropdown is None does nothing
+
+## Upload Page
+- the upload button an text appear
+- clicking the button opens os file picker
+    - only pdfs are selectable
+- on cancel snack bar lets you know
+- on proper selection view pops up
+
+## Edit Upload View
+- can see pdf preview
+- can remove pages
+- can select, deselect, create, and delete tags
+- selecting tags makes button with the tag as it's text appear
+- discard and save collapse teh view returning to upload page
+- save in due time shows a green snackbar
+- discard shows a red snack bar
+
+# Questions
+- ocr is async so what if another file is uploaded and set to be ocr'd in that time?
+    - does another instance spawn? is there a problem?
+    - does it know the resource is in use so it awaits?
+    - if it doesn't await
+        - there's a race condition for insertion

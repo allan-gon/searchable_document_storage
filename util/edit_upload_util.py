@@ -111,7 +111,7 @@ def save(event: ControlEvent, tags: Row, ocr, nlp) -> None:
     folder = move_files()
     tags = [control.text for control in tags.controls]
     clear_view(event)
-    text = run(extract_text(folder, ocr))  # , nlp))
+    text = run(extract_text(folder, ocr))
     embed = get_embedding(text, nlp)
     insert(embed, folder, tags)
     event.page.show_snack_bar(

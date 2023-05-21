@@ -13,7 +13,7 @@ from flet import Page, ElevatedButton, Text
 def create_init_upload_page(page: Page) -> None:
     page.controls.clear()
     clear_folder(TEMP_DIR)
-    page.controls.append(Text("Select "))
+    page.controls.append(Text("Select a pdf"))
     page.controls.append(
         ElevatedButton(
             text="Upload",
