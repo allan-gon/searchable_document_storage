@@ -1,7 +1,6 @@
 # built-in
 from os.path import exists, abspath
 from os import mkdir, listdir, remove
-from shutil import copy
 from webbrowser import open as web_open
 from functools import partial
 
@@ -46,6 +45,7 @@ from qdrant_client.http.models import (
     MatchValue,
 )
 from img2pdf import convert
+from fitz import open as open_pdf
 
 
 def remove_btn(event: ControlEvent, lv: ListView) -> None:
@@ -80,7 +80,7 @@ def populate_listview(lv: ListView) -> None:
 
 def upload_dialog(event: ControlEvent) -> None:
     event.page.overlay[0].pick_files(
-        file_type=FilePickerFileType.IMAGE, allow_multiple=True
+        file_type=FilePickerFileType.CUSTOM, allowed_extensions=["pdf"]
     )
 
 
@@ -158,38 +158,22 @@ def setup() -> tuple:
     return Reader(["en"]), load(SPACY_MODEL_PATH)
 
 
-def intermediate(res: FilePickerResultEvent, route: str) -> None:
-    """
-    Needed to refresh page since that only happens on route change.
-    Refreshing, to the user, doesn't mean changing pages so behind the
-    scenes I change the route then return so the on route change event
-    triggers and page is refreshed
-    """
-    if len(res.page.views) > 1:
-        clear_view(res)
-    res.page.go("/intermediate")
-    res.page.go(route)
-
-
 def copy_selected_files(res: FilePickerResultEvent) -> None:
     if res.files:
-        for file in res.files:
-            if file not in listdir(TEMP_DIR):
-                copy(file.path, TEMP_DIR)
-
-        # after files are copied need to go to edit_upload
-        if res.page.route != "/edit_upload":
-            res.page.go("/edit_upload")
-        else:
-            # if already on edit_upload simply need to update lv
-            populate_listview(res.page.views[-1].controls[0].controls[0].controls[-1])
-            res.page.update()
+        # convert into image and save them to temp folder
+        with open_pdf(res.files[0].path) as pdf:
+            for page_num in range(pdf.page_count):
+                page = pdf.load_page(page_num)
+                pix = page.get_pixmap()
+                pix.save(f"{TEMP_DIR}/{page_num}.png")
+        # after pdf to image go to edit_upload page
+        res.page.go("/edit_upload")
 
     else:
         # this red may be too harsh
         res.page.show_snack_bar(
             SnackBar(
-                content=Text(value="No images selected"), open=True, bgcolor="#FF3030"
+                content=Text(value="No pdf selected"), open=True, bgcolor="#FF3030"
             )
         )
 

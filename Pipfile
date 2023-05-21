@@ -9,6 +9,8 @@ easyocr = "==1.6.2"
 spacy = "==3.5.2"
 qdrant-client = "==1.1.6"
 img2pdf = "==0.4.4"
+pdf2image = "==1.16.3"
+pymupdf = "==1.22.3"
 
 [dev-packages]
 black = "*"

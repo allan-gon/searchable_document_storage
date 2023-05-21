@@ -9,7 +9,6 @@ from src.helper import (
     insert,
     get_embedding,
     clear_view,
-    upload_dialog,
     populate_listview,
 )
 from src.constants import TAGS_FILE, DOCS_DIR, TEMP_DIR
@@ -19,7 +18,6 @@ from flet import (
     Row,
     Page,
     Text,
-    Image,
     Column,
     ListView,
     ElevatedButton,
@@ -28,11 +26,22 @@ from flet import (
     Dropdown,
     dropdown,
     TextField,
-    FilePickerFileType,
     ControlEvent,
     View,
     SnackBar,
 )
+
+
+def discard(event: ControlEvent) -> None:
+    clear_view(event)
+    event.page.show_snack_bar(
+        SnackBar(
+            content=Text(value="Document Discarded"),
+            open=True,
+            bgcolor="#FF3030",
+        )
+    )
+    event.page.update()
 
 
 def create_tag(event: ControlEvent, drop: Dropdown, text: TextField) -> None:
@@ -155,10 +164,6 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                         Column(
                             expand=1,
                             controls=[
-                                ElevatedButton(
-                                    text="Upload more files",
-                                    on_click=partial(upload_dialog),
-                                ),
                                 lv,
                             ],
                         ),
@@ -224,7 +229,7 @@ def create_edit_upload_page(page: Page, ocr, nlp) -> None:
                                         OutlinedButton(
                                             expand=1,
                                             text="Discard",
-                                            on_click=clear_view,
+                                            on_click=discard,
                                         ),
                                         ElevatedButton(
                                             expand=1,
