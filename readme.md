@@ -65,7 +65,3 @@ pyinstaller --hidden-import=dbm.dumb --noconfirm --onefile main.py
         - there's a race condition for insertion
 
 <!-- i have a function that setups up the layout for a page in my app. One element in the layout is the save button whose callback does some io then calls an async function that uses a model. The result if the async function is used to insert into a database. To be clear everything is synchronous except for the async function my callback uses. It's this way because teh model may take time to give a result but the user doesn't need to know that and have a slow experience. But since this allows the user to continue using the app, what happens if they click the save button again before teh model is finished or the database is written to? Does it wait for the resources or do i have a race condition? -->
-
-- fixed image bug caused by caching
-- fixed order preservation of pdf
-- missing link to update
