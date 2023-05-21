@@ -70,6 +70,7 @@ def launch_pdf() -> None:
 def launch_doc(event: ControlEvent, lv: ListView) -> None:
     for row in lv.controls:
         if row.controls[-1] == event.control:
+            # already in order so sorting does not happen
             images = [image.src for image in row.controls[1:-1]]
             clear_folder(TEMP_DIR)
             create_pdf(images)
@@ -90,7 +91,7 @@ def populate_results(
         for idx, doc in enumerate(docs, 1):
             row = Row(expand=1, wrap=False, scroll="always")
             row.controls.append(Text(value=idx))
-            for file in listdir(doc):
+            for file in sorted(listdir(doc), key=lambda x: int(x.split("_")[0])):
                 row.controls.append(
                     Image(
                         # TODO: fix this nonsense. the folder name stuff requires

@@ -2,6 +2,7 @@
 from functools import partial
 from os.path import exists
 from os import mkdir
+from uuid import uuid4
 
 # my code
 from util.constants import (
@@ -100,7 +101,9 @@ def copy_selected_files(
             for page_num in range(pdf.page_count):
                 page = pdf.load_page(page_num)
                 pix = page.get_pixmap()
-                pix.save(f"{TEMP_DIR}/{page_num}.png")
+                # technically possible to get overlapping names
+                # page_num used to preserve order of pdf
+                pix.save(f"{TEMP_DIR}/{page_num}_{uuid4().hex}.png")
         # after pdf to image go to edit_upload page
         create_edit_upload_page(res.page, ocr, nlp)
 

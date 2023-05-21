@@ -138,7 +138,7 @@ def remove_btn(event: ControlEvent, lv: ListView) -> None:
 
 def populate_listview(lv: ListView) -> None:
     abs_dir = abspath(TEMP_DIR)
-    for file in listdir(abs_dir):
+    for file in sorted(listdir(abs_dir), key=lambda x: int(x.split("_")[0])):
         # a row in the list view is 2/3 image and 1/3 button
         lv.controls.append(
             Row(
