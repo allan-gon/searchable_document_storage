@@ -7,7 +7,7 @@ from shutil import move
 
 # my code
 from util.constants import TAGS_FILE, DOCS_DIR, TEMP_DIR, COLLECTION_NAME, VEC_DB_DIR
-from util.shared_util import get_embedding
+from util.shared_util import get_embedding, clear_folder
 
 # packages
 from flet import (
@@ -32,6 +32,7 @@ def clear_view(event: ControlEvent) -> None:
 
 
 def discard(event: ControlEvent) -> None:
+    clear_folder(abspath(TEMP_DIR))
     clear_view(event)
     event.page.show_snack_bar(
         SnackBar(
@@ -88,7 +89,7 @@ async def extract_text(folder: str, ocr) -> str:
     for file in listdir(folder):
         content = ocr.readtext(f"{folder}/{file}", detail=0)
         full_text += " " + " ".join(content)
-    return full_text
+    return full_text.lower()
 
 
 def insert(embedding: list[float], folder: str, tags: list[str]) -> None:
@@ -135,7 +136,6 @@ def remove_btn(event: ControlEvent, lv: ListView) -> None:
 
 
 def populate_listview(lv: ListView) -> None:
-    lv.controls.clear()
     abs_dir = abspath(TEMP_DIR)
     for file in listdir(abs_dir):
         # a row in the list view is 2/3 image and 1/3 button
@@ -144,7 +144,10 @@ def populate_listview(lv: ListView) -> None:
                 expand=True,
                 controls=[
                     Image(
-                        expand=2, src=f"{abs_dir}/{file}", width=3 * 192, height=3 * 108
+                        expand=2,
+                        src=f"{abs_dir}/{file}",
+                        width=3 * 192,
+                        height=3 * 108,
                     ),
                     ElevatedButton(
                         expand=1, text="Remove", on_click=partial(remove_btn, lv=lv)

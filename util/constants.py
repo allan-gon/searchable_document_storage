@@ -6,7 +6,8 @@ HEIGHT = 1080 // 2
 # used for navigation
 ROUTES = ["/search", "/begin_upload"]
 # all relative to root folder
-SPACY_MODEL_PATH = "./model/en_core_web_sm-3.5.0"
+SPACY_MODEL_PATH = "./model"  # currently the large model
+DIMENSION = 300
 DATA_DIR = "./data"
 TEMP_DIR = f"{DATA_DIR}/temp"
 DOCS_DIR = f"{DATA_DIR}/docs"

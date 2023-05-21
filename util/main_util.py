@@ -13,6 +13,7 @@ from util.constants import (
     VEC_DB_DIR,
     SPACY_MODEL_PATH,
     COLLECTION_NAME,
+    DIMENSION,
 )
 from src.pages.edit_upload import create_edit_upload_page
 
@@ -55,7 +56,7 @@ def create_db() -> None:
     client = QdrantClient(path=VEC_DB_DIR)
     client.recreate_collection(
         collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=96, distance=Distance.COSINE),
+        vectors_config=VectorParams(size=DIMENSION, distance=Distance.COSINE),
     )
 
 
