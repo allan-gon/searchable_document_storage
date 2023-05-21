@@ -38,9 +38,5 @@ def remove_stops_and_lemmatize(doc):
 def get_embedding(text, nlp):
     doc = nlp(text)
     lemmatized_tokens = remove_stops_and_lemmatize(doc)
-    # if all words are stop, list is empty and dims are off
-    # whitespace string fixes that
-    if not lemmatized_tokens:
-        lemmatized_tokens = [" "]
     lemmatized_doc = nlp(" ".join(lemmatized_tokens))
     return lemmatized_doc.vector

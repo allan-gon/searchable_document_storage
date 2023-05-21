@@ -24,6 +24,7 @@ from flet import (
 )
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct
+from easyocr.easyocr import Reader as OcrModel
 
 
 def clear_view(event: ControlEvent) -> None:
@@ -84,7 +85,7 @@ def move_files() -> str:
     return folder
 
 
-async def extract_text(folder: str, ocr) -> str:
+async def extract_text(folder: str, ocr: OcrModel) -> str:
     full_text = ""
     for file in listdir(folder):
         content = ocr.readtext(f"{folder}/{file}", detail=0)

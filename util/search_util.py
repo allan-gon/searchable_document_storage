@@ -79,31 +79,33 @@ def launch_doc(event: ControlEvent, lv: ListView) -> None:
 def populate_results(
     event: ControlEvent, tags: Row, text_field: TextField, nlp
 ) -> None:
-    abs_dir = abspath(DOCS_DIR)
-
-    docs = find_docs([control.text for control in tags.controls], text_field.value, nlp)
-
     lv = event.page.controls[0].controls[-1]
     lv.controls.clear()
-    for idx, doc in enumerate(docs, 1):
-        row = Row(expand=1, wrap=False, scroll="always")
-        row.controls.append(Text(value=idx))
-        for file in listdir(doc):
-            row.controls.append(
-                Image(
-                    # TODO: fix this nonsense. the folder name stuff requires
-                    # changing a few functions
-                    src=f"{abs_dir}/{doc.split('/')[-1]}/{file}",
-                    width=200,
-                    height=200,
-                    fit=ImageFit.CONTAIN,
-                    repeat=ImageRepeat.NO_REPEAT,
-                    border_radius=border_radius.all(10),
-                ),
-            )
-        row.controls.append(
-            ElevatedButton(text="View", on_click=partial(launch_doc, lv=lv))
-        )
 
-        lv.controls.append(row)
-    event.page.update()
+    text = text_field.value.strip()
+    if text:
+        abs_dir = abspath(DOCS_DIR)
+        docs = find_docs([control.text for control in tags.controls], text, nlp)
+
+        for idx, doc in enumerate(docs, 1):
+            row = Row(expand=1, wrap=False, scroll="always")
+            row.controls.append(Text(value=idx))
+            for file in listdir(doc):
+                row.controls.append(
+                    Image(
+                        # TODO: fix this nonsense. the folder name stuff requires
+                        # changing a few functions
+                        src=f"{abs_dir}/{doc.split('/')[-1]}/{file}",
+                        width=200,
+                        height=200,
+                        fit=ImageFit.CONTAIN,
+                        repeat=ImageRepeat.NO_REPEAT,
+                        border_radius=border_radius.all(10),
+                    ),
+                )
+            row.controls.append(
+                ElevatedButton(text="View", on_click=partial(launch_doc, lv=lv))
+            )
+
+            lv.controls.append(row)
+        event.page.update()
