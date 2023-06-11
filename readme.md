@@ -12,7 +12,8 @@ flet pack .\main.py --icon icon.ico --hidden-import=dbm.dumb
 
 # TODO
 - speed up startup
-    - use larger spacy model
+- better search results
+    - come up with a testable metric
 
 # Dev stuff
 - to check if works as binary
